@@ -42,8 +42,7 @@ const Header = () => {
                     to={link.to}
                     className="flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-slate-700/80 transition-all duration-300"
                   >
-                    {Icon && <Icon className="w-4 h-4" />}
-                    <span>{link.label}</span>
+                    {Icon && <Icon className="w-8 h-8" />}
                   </Link>
 
                   {/* Dropdown on hover (for profile) */}

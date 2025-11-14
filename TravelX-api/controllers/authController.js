@@ -1,6 +1,7 @@
 const { generateState, generateCodeVerifier } = require("arctic");
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
+const upload = require("../middleware/upload");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "10d" });
@@ -8,7 +9,7 @@ const generateToken = (id) => {
 
 const RegisterUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, dob, mobile, location } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ error: "Please add all fields" });
@@ -19,7 +20,23 @@ const RegisterUser = async (req, res) => {
       return res.status(400).json({ error: "User already exists" });
     }
 
-    const user = await User.create({ name, email, password });
+    const user = await User.create({
+      name,
+      email,
+      password,
+      dob,
+      mobile,
+      location,
+      profilePhoto,
+    });
+    const gravatarHash = crypto
+      .createHash("md5")
+      .update(email.toLowerCase().trim())
+      .digest("hex");
+    user.profilePhoto = `https://www.gravatar.com/avatar/${gravatarHash}?d=identicon&s=200`;
+
+    await user.save();
+
     if (user) {
       res.status(201).json({ token: generateToken(user._id) });
     } else {
@@ -49,17 +66,41 @@ const LoginUser = async (req, res) => {
 };
 
 const getuserProfile = async (req, res) => {
-  res.json(req.user);
+  try {
+    const user = req.user.toObject();
+    if (user.profilePhoto && user.profilePhoto.data) {
+      user.profilePhoto.data = user.profilePhoto.data.toString("base64");
+    }
+    res.json(user);
+  } catch (error) {
+    console.error("Profile fetch error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
 };
 
 const updateuserProfile = async (req, res) => {
   try {
+    const { name, dob, mobile, location } = req.body;
+    const updates = { name, dob, mobile, location };
+
+    if (req.file) {
+      updates.profilePhoto = {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+      };
+    }
+
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { name: req.body.name },
+      { $set: updates },
       { new: true }
     );
-    res.json(user);
+    const userObj = user.toObject();
+    if (userObj.profilePhoto && userObj.profilePhoto.data) {
+      userObj.profilePhoto.data = userObj.profilePhoto.data.toString("base64");
+    }
+
+    res.json(userObj);
   } catch (error) {
     console.error("Update Error:", error);
     res.status(500).json({ error: "Server error" });

@@ -5,16 +5,34 @@ import { useAuthStore } from "../../stores/authStore";
 const EditProfile = () => {
      const { user, updateProfile, loading, error } = useAuthStore();
      const [name, setName] = useState('');
+     const [dob, setDob] = useState('');
+     const [mobile, setMobile] = useState('');
+     const [photo, setPhoto] = useState(null);
+     const [location, setLocation] = useState('');
      const navigate = useNavigate();
 
      useEffect(() => {
-          if (user) setName(user.name);
+          if (user) {
+               setName(user.name || '');
+               setDob(user.dob ? user.dob.split('T')[0] : '');
+               setMobile(user.mobile || '');
+               setLocation(user.location || '');
+          }
      }, [user]);
 
      const submitForm = async (e) => {
           e.preventDefault();
-          updateProfile(name);
-          navigate('/myprofile')
+          const formData = new FormData();
+          formData.append('name', name);
+          formData.append('dob', dob);
+          formData.append('mobile', mobile);
+          formData.append('location', location);
+          if (photo) formData.append('photo', photo);
+
+          const result = await updateProfile(formData);
+          if (result.success) {
+               navigate('/myprofile');
+          }
      };
 
      return (
@@ -26,9 +44,46 @@ const EditProfile = () => {
                          type="text"
                          value={name}
                          onChange={(e) => setName(e.target.value)}
-                         placeholder="Your name"
+                         placeholder="Name"
                          required
                     />
+                    <br />
+                    <input
+                         type="date"
+                         value={dob}
+                         onChange={(e) => setDob(e.target.value)}
+                         placeholder="DOB"
+                         required
+                    />
+                    <br />
+                    <input
+                         type="tel"
+                         value={mobile}
+                         onChange={(e) => setMobile(e.target.value)}
+                         placeholder="Phone"
+                         required
+                         pattern="[0-9]{10}"
+                         maxLength="10"
+                         minLength="10"
+                         title="Phone number must be exactly 10 digits"
+                    />
+
+                    <br />
+                    <input
+                         type="location"
+                         value={location}
+                         onChange={(e) => setLocation(e.target.value)}
+                         placeholder="Location"
+                         required
+                    />
+                    <br />
+                    <input
+                         type="file"
+                         accept="image/*"
+                         onChange={(e) => setPhoto(e.target.files[0])}
+                         className="w-full p-2 border rounded"
+                    />
+                    <br />
                     <button type="submit" disabled={loading}>
                          {loading ? 'Updating...' : 'Update Profile'}
                     </button>

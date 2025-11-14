@@ -8,6 +8,7 @@ const {
 } = require("../controllers/authController");
 const { protect } = require("../middleware/authMiddleware");
 const passport = require("passport");
+const upload = require("../middleware/upload");
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ router.post("/login", LoginUser);
 
 router.get("/profile", protect, getuserProfile);
 
-router.put("/profile", protect, updateuserProfile);
+router.put("/profile", protect, upload, updateuserProfile);
 
 router.get(
   "/google",

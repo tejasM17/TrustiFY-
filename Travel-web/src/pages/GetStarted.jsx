@@ -2,6 +2,7 @@ import React from "react";
 import { ArrowRight, Globe, Shield, Zap } from "lucide-react";
 import { Button } from "@/componants/ui/button";
 import heroImage from "@/assets/hero-currency.jpg";
+import { Link } from "react-router";
 
 const GetStarted = () => {
   return (
@@ -55,13 +56,13 @@ const GetStarted = () => {
 
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Button className="w-full sm:w-auto group">
-            Get Started
-            <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-          </Button>
-          <Button variant="outline" className="w-full sm:w-auto bg-white/5 backdrop-blur-sm">
-            See How It Works
-          </Button>
+          <Link to='/home/login'>
+            <Button className="w-full sm:w-auto group cursor-pointer">
+              Get Started
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </Button>
+          </Link>
+
         </div>
       </div>
     </section>

@@ -7,6 +7,7 @@ const authStore = (set, get) => ({
   loading: false,
   token: localStorage.getItem("token") || null,
   user: null,
+
   getProfile: async () => {
     const token = get().token;
     if (!token) {
@@ -34,14 +35,31 @@ const authStore = (set, get) => ({
       get().logout();
     }
   },
-  register: async (name, email, password) => {
+
+  register: async (
+    name,
+    email,
+    password,
+    dob,
+    mobile,
+    location,
+    profilePhoto
+  ) => {
     try {
       const response = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          dob,
+          mobile,
+          location,
+          profilePhoto,
+        }),
       });
       const data = await response.json();
       console.log(data);
@@ -53,6 +71,7 @@ const authStore = (set, get) => ({
       console.log(error);
     }
   },
+
   login: async (email, password) => {
     try {
       const response = await fetch("http://localhost:5000/api/auth/login", {
@@ -72,26 +91,31 @@ const authStore = (set, get) => ({
       console.log(error);
     }
   },
-  updateProfile: async (newName) => {
+
+  updateProfile: async (profileData) => {
     set({ loading: true, error: null });
     try {
       const token = get().token;
       const res = await fetch("http://localhost:5000/api/auth/profile", {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ name: newName }),
+        body: profileData,
       });
 
-      if (!res.ok) throw new Error("Update failed");
-      const updatedUser = await res.json();
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Update failed");
+      }
 
+      const updatedUser = await res.json();
       set({ user: updatedUser });
+      return { success: true };
     } catch (err) {
       console.error(err);
       set({ error: err.message });
+      return { error: err.message };
     } finally {
       set({ loading: false });
     }
@@ -106,10 +130,11 @@ const authStore = (set, get) => ({
     }
     return { error: "No token in URL" };
   },
+
   logout: () => {
     localStorage.removeItem("token");
     set({ token: null, user: null, error: null, loading: false });
-    Navigate("/");
+    Navigate("/getstarted");
   },
 });
 
