@@ -35,11 +35,29 @@ const EditProfile = () => {
           }
      };
 
+     const photoUrl = user.profilePhoto?.data
+          ? `data:${user.profilePhoto.contentType};base64,${user.profilePhoto.data}`
+          : 'https://static.vecteezy.com/system/resources/previews/036/280/651/original/default-avatar-profile-icon-social-media-user-image-gray-avatar-icon-blank-profile-silhouette-illustration-vector.jpg';
+
+
      return (
-          <div >
+          <div className="">
                <h1 >Edit Profile</h1>
+               <img
+                    src={photoUrl}
+                    alt="Profile"
+                    className="w-32 h-32 rounded-full object-cover border-4 border-blue-500"
+               />
                {error && <p style={{ color: 'red' }}>{error}</p>}
                <form onSubmit={submitForm} className="space-y-4">
+
+                    <br /><input
+                         type="file"
+                         accept="image/*"
+                         onChange={(e) => setPhoto(e.target.files[0])}
+                         className="p-2 border rounded"
+                    />
+                    <br />
                     <input
                          type="text"
                          value={name}
@@ -77,12 +95,7 @@ const EditProfile = () => {
                          required
                     />
                     <br />
-                    <input
-                         type="file"
-                         accept="image/*"
-                         onChange={(e) => setPhoto(e.target.files[0])}
-                         className="w-full p-2 border rounded"
-                    />
+
                     <br />
                     <button type="submit" disabled={loading}>
                          {loading ? 'Updating...' : 'Update Profile'}
